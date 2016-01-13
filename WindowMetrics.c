@@ -81,7 +81,7 @@ dsfmt_t dsfmt;
 // function declarations
 short int addAnewMutation(int locus, short int parentalAllele);
 double boxMuller(double mu, double sd);
-void buildFitnessArray( double *fitnessArray, int *demeIndexesStart, int deme, int numInDeme );
+void buildFitnessArray( double *selectionCoefficients, int *demeIndexesStart, int deme, int numInDeme );
 void calculateMetricsAndStats(void);
 void finalPrints(void);
 void initializePopulation(void);
@@ -96,6 +96,7 @@ void usage(char *s);
 void useShortTestValuesOfParameters(void);
 int compare(const void *p, const void *q);
 double Cutoff(double viabilityArray);
+double walker(double* dum, int index);
 
 // global variables for command line options
 int TOTAL_N = TOTAL_N_DEFAULT;
@@ -357,7 +358,7 @@ double boxMuller(double mu, double sd)
 }
 
 
-void buildFitnessArray( double *fitnessArray, int *demeIndexesStart, int deme, int numInDeme )
+void buildFitnessArray(int *demeIndexesStart, int deme, int numInDeme )
 {
 double siteTypeProbabilities[3], dum;
 int i;
@@ -367,6 +368,10 @@ int i;
     
     // make a check to see if the cumulative probabilites exceed 1
     
+	if (siteTypeProbabilities[0]+siteTypeProbabilities[1]+siteTypeProbabilities[2] > 1){
+		printf("error: cumulative site type probabilities exceed 1! (buildFitnessArray, line 372)");
+		exit(1);
+	}
 
     // choose which sites are under selection
 if (initializer = 0){
@@ -1010,7 +1015,7 @@ int pickParent( double *fitnessArray, int prevChosen, int nInDeme )
 //	momi = *(ipt + momi); // extract the right index from the overall index array; "momi" and "dadi" are "local" indexes in the consecutive fitness array
 //        dadi = *(ipt + dadi);
 
-	sipt = OffspringGenotyes;
+	sipt = offspringGenotyes;
 
     int luckyOne;
     if ( MODEL_TYPE == MODEL_TYPE_NEUTRAL_ONLY ) {
@@ -1022,7 +1027,7 @@ int pickParent( double *fitnessArray, int prevChosen, int nInDeme )
         //fprintf(stderr, "\nError in pickParent()! Procedures not in place for MODEL_TYPE_SELECTION\n");
         //exit(-1);
 
-	int s_total;
+	int s_total=0;
 	int s_sum;
 	int individual=0;
 	int i=0, j=0;
@@ -1032,17 +1037,17 @@ for (i; i<sitesInGenome; i++){
 }
 
 for(individual = 0; individual < nInDeme; individual++){
-	s_total_i = 0; i=0;
+	s_total=0, i=0;
 	for (j; j<sitesInGenome; j++)
 		{
 			for (i=0;i<2;i++){
 				if (*sipt = 1){
-					s_total_i += selectionCoefficients[j];
+					s_total += selectionCoefficients[j];
 				}
 				sipt++;
 			}
 		} //builds individual selection total for comparison to overall total
-viabilityArray[individual]=s_total_i; 
+viabilityArray[individual]=s_total; 
 
 }
 cutoff = Cutoff(selectionCoefficients, viabilityArray);
@@ -1156,8 +1161,8 @@ void reproduction(int *demeIndexes)
         
         // choose parents n times and make n offspring
         for ( j = 0; j < n; j++ ) {
-            momi = pickParent( &fitnessArray[0], -1, n ); // -1 = flag for parent not chosen yet
-            dadi = pickParent( &fitnessArray[0], momi, n );
+            momi = pickParent( &selectionCoefficients[0], -1, n ); // -1 = flag for parent not chosen yet
+            dadi = pickParent( &selectionCoefficients[0], momi, n );
             momi = *(ipt + momi); // extract the right index from the overall index array; "momi" and "dadi" are "local" indexes in the consecutive fitness array
             dadi = *(ipt + dadi);
             
@@ -1281,3 +1286,10 @@ void useShortTestValuesOfParameters(void)
 }
 
 
+double walker(double* dum, int index){
+int i=0;
+	for (i, i++, i<index){
+		walker++;
+	}
+	return walker;
+}
