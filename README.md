@@ -1,2 +1,4 @@
 # Divergence-Metrics
-Work with Prof. Samuel Flaxman; Genetic divergence across time of two demes 
+Work with Prof. Samuel Flaxman; Genetic divergence simulation with two demes
+
+
