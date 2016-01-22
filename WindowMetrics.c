@@ -81,22 +81,22 @@ dsfmt_t dsfmt;
 // function declarations
 short int addAnewMutation(int locus, short int parentalAllele);
 double boxMuller(double mu, double sd);
-void buildFitnessArray( double *selectionCoefficients, int *demeIndexesStart, int deme, int numInDeme );
+void buildFitnessArray(int *demeIndexesStart, int deme, int numInDeme );
 void calculateMetricsAndStats(void);
 void finalPrints(void);
 void initializePopulation(void);
 void makeOffspring(int momi, int dadi, short int *offspringGTpt);
 void migration(int *demeIndexes);
 void openDataRecordingFiles(void);
-int pickParent( double *fitnessArray, int prevChosen, int nInDeme );
+int pickParent( int prevChosen, int nInDeme );
 long int Poisson(double mm);
 void reproduction(int *demeIndexes);
 void RNGsetup(void);
 void usage(char *s);
 void useShortTestValuesOfParameters(void);
 int compare(const void *p, const void *q);
-double Cutoff(double viabilityArray);
-double walker(double* dum, int index);
+double Cutoff(double* viabilityArray);
+double* walker(double* dum, int index);
 
 // global variables for command line options
 int TOTAL_N = TOTAL_N_DEFAULT;
@@ -132,7 +132,7 @@ FILE *DaOverTime, *DxyOverTime, *variableLociOverTime, *FSToverTime;
 long int t = 0;
 int initializer=0, cinitializer=0;
 double* selectionCoefficients;
-const int cutoff;
+int cutoff;
 
 // global pointers for malloc() calls
 double *genomeMap;
@@ -1002,11 +1002,11 @@ void openDataRecordingFiles(void)
 
 
 
-int pickParent( double *fitnessArray, int prevChosen, int nInDeme )
+int pickParent(int prevChosen, int nInDeme )
 {
     int i, j, n, count, dadi, momi, *ipt;
     int aliveOnes[nInDeme], nAlive=0;
-    double fitnessArray[TOTAL_N];
+    //double fitnessArray[TOTAL_N];
     short int *offspringGenotyes, *sipt;
     int *offspringDemeLocations;
     offspringGenotyes = (short int *) malloc( (sizeof(short int) * 2 * totalSitesInGenome * TOTAL_N) );
@@ -1032,13 +1032,13 @@ int pickParent( double *fitnessArray, int prevChosen, int nInDeme )
 	int individual=0;
 	int i=0, j=0;
 	double viabilityArray[nInDeme];
-for (i; i<sitesInGenome; i++){
+for (i; i<nSITES_PER_WINDOW; i++){
 	s_sum += selectionCoefficients[i];
 }
 
 for(individual = 0; individual < nInDeme; individual++){
 	s_total=0, i=0;
-	for (j; j<sitesInGenome; j++)
+	for (j; j<nSITES_PER_WINDOW; j++)
 		{
 			for (i=0;i<2;i++){
 				if (*sipt = 1){
@@ -1050,7 +1050,7 @@ for(individual = 0; individual < nInDeme; individual++){
 viabilityArray[individual]=s_total; 
 
 }
-cutoff = Cutoff(selectionCoefficients, viabilityArray);
+cutoff = Cutoff(viabilityArray);
 i=0;
 int deadTracker;
 
@@ -1070,19 +1070,12 @@ luckyOne = randI() % deadTracker; //not nInDeme! Choose from array of live/dead
     return aliveOnes[luckyOne];
 }
 
-double Cutoff(double viabilityArray){
+double Cutoff(double* viabilityArray){
     double cutoffArray[nInDeme];
     memcpy(cutoffArray, viabilityArray, sizeof(double));
     qsort(cutoffArray, nInDeme, sizeof(double), compare);
     int deadMarker = CUTOFF*nInDeme, j=0;
-    exit(1);
-
-    /*for (i=0; i<nInDeme; i++){
-        if (cutoffArray[i] != 0){
-            alive_svalues[j] = cutoffArray[i];
-            j++;
-        }
-    } IS THIS LOOP NECESSARY??? */ 
+    //exit(1);
     return cutoffArray[deadMarker];
 }
 
@@ -1142,7 +1135,7 @@ void reproduction(int *demeIndexes)
     
     offspringGenotyes = (short int *) malloc( (sizeof(short int) * 2 * totalSitesInGenome * TOTAL_N) );
     offspringDemeLocations = (int *) malloc( (sizeof(int) * TOTAL_N) );
-    fitnessArray = (double *) malloc( (sizeof(double)*totalSitesInGenome));
+    selectionCoefficients = (double *) malloc( (sizeof(double)*totalSitesInGenome));
     
     sipt = offspringGenotyes;
     ipt = demeIndexes;
@@ -1153,7 +1146,7 @@ void reproduction(int *demeIndexes)
         
         // set up fitness array for choosing parents
         if ( MODEL_TYPE == MODEL_TYPE_SELECTION )
-            buildFitnessArray( fitnessArray, ipt, i, n );// buildFitnessArray uses addres
+            buildFitnessArray(ipt, i, n );// buildFitnessArray uses addres
         else if ( MODEL_TYPE != MODEL_TYPE_NEUTRAL_ONLY ) {
             fprintf(stderr, "\nError in reproduction()!  MODEL_TYPE (= %i) not recognized!\n", MODEL_TYPE);
             exit(-1);
@@ -1286,10 +1279,10 @@ void useShortTestValuesOfParameters(void)
 }
 
 
-double walker(double* dum, int index){
+double* walker(double* dum, int index){
 int i=0;
-	for (i, i++, i<index){
-		walker++;
+	for (i; i++; i<index){
+		dum++;
 	}
-	return walker;
+	return dum;
 }

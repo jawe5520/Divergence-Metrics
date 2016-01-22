@@ -1,0 +1,70 @@
+Line 1147: 
+call to buildFitnessArray uses the address of the 0th element of fitnessArray; I've changed it from &fitnessArray[0] to simply fitnessArray. Is that cool?
+
+Line 1136:
+Declaration of fitnessArray as an array of doubles. Cool?
+
+Line 1077:
+What's the deal with the alive_svalues array?
+
+Line 1159/1160:
+Access fitness array with brackets and address; fix
+
+Line 1054:
+Removed aliveTracker[deadTracker] = i line; irrelevant? Check
+
+Line 133:
+Defining selectionCoefficients as double* : yay or nay?
+
+--------------------------
+
+Notes:
+
+--------------------------
+
+-Edit Cutoff function declaration:
+
+double Cutoff(double* selectionCoefficients, double* viabilityArray)
+=>
+double Cutoff (double viabilityArray)
+
+
+-Edit variable fitnessArray:
+
+double fitnessArray[TOTAL_N];
+=>
+double *fitnessArray;
+
+Related lines/to-do:
+Lines 1159/1160:
+momi = pickParent( &fitnessArray[0], -1, n ); // -1 = flag for parent not chosen yet
+dadi = pickParent( &fitnessArray[0], momi, n );
+
+-Build helper function to walk to index n 
+-Pass index of first fitnessArray element to function, use to parse to helper function from within program? //Later note: fitnessArray being replaced with
+selectionCoefficients, an indexed array, makes this irrelevant
+
+-Alternatively: change presence of fitnessArray in function declarations (only place used) into selectionCoefficients array? (includes pickParent)
+
+-----------------------------------------------------
+
+1-12
+
+Lines 1159/1160:
+
+&fitnessArray[0] -> &selectionCoefficients[0]
+Check to make sure that selectionCoefficients has been passed properly!
+Currently using brackets- is that the best way to proceed? (Certainly the easiest)
+
+Walker function built; prototype added. Not debugged
+
+buildFitnessArray function has double* fitnessArray as an argument. Changing to double* selectionCoefficients on initial pass; check to see if this 
+argument is necessary
+
+Added check for siteTypeProbabilities exceeding 1 (line 370, buildFitnessArray)
+
+Removed double* fitnessArray argument from buildFitnessArray (unnecessary)
+
+selectionCoefficients declared as global double*. Will this be suitable when it's accessed as an indexed array?
+
+in pickParent: s_total_i replaced with s_total in all cases; resets upon incrementation of outer for loop
